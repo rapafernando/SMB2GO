@@ -1,0 +1,92 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Business {
+  id                 String              @id @default(uuid())
+  name               String
+  slug               String              @unique
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  services           Service[]
+  aboutSection       AboutSection?
+  contactSubmissions ContactSubmission[]
+  calendarConnection CalendarConnection?
+  bookings           Booking[]
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name        String
+  description String
+  price       Float?
+  type        String // e.g. "TAX", "NOTARY", "CONSULTATION"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+model AboutSection {
+  id          String   @id @default(uuid())
+  businessId  String   @unique
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  bio         String
+  credentials String[] // Array of credentials
+  experience  String // e.g., "Over 10 years of experience"
+  photoUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactSubmission {
+  id         String   @id @default(uuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name       String
+  email      String
+  phone      String?
+  message    String
+  status     String   @default("NEW") // "NEW", "READ", "ARCHIVED"
+  createdAt  DateTime @default(now())
+
+  @@index([businessId])
+}
+
+model CalendarConnection {
+  id           String   @id @default(uuid())
+  businessId   String   @unique
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  provider     String   @default("google")
+  accessToken  String
+  refreshToken String
+  tokenExpiry  DateTime
+  calendarId   String   @default("primary")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Booking {
+  id            String   @id @default(uuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  visitorName   String
+  visitorEmail  String
+  visitorPhone  String?
+  startTime     DateTime
+  endTime       DateTime
+  notes         String?
+  googleEventId String?
+  status        String   @default("SCHEDULED") // "SCHEDULED", "CANCELLED"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([businessId])
+}
