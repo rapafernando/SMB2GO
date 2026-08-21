@@ -9,6 +9,7 @@ export default function ContactPage() {
     email: "",
     phone: "",
     message: "",
+    website: "", // Honeypot field for spam protection
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -39,7 +40,7 @@ export default function ContactPage() {
       }
 
       setSubmitted(true);
-      setFormData({ name: "", email: "", phone: "", message: "" });
+      setFormData({ name: "", email: "", phone: "", message: "", website: "" });
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
     } finally {
@@ -125,6 +126,19 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Honeypot field for spam protection (hidden from humans) */}
+                <div className="absolute opacity-0 -z-10 select-none pointer-events-none w-0 h-0 overflow-hidden">
+                  <label htmlFor="website">Website</label>
+                  <input
+                    type="text"
+                    id="website"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={formData.website}
+                    onChange={handleChange}
+                  />
+                </div>
                 <h2 className="text-xl font-bold text-slate-900 mb-2">Send us a Message</h2>
                 <p className="text-slate-500 text-sm mb-6">
                   Fill out the form below and we'll get back to you shortly.
